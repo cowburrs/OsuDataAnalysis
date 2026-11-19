@@ -18,6 +18,7 @@
           pyarrow
           tqdm
           ossapi
+          ratelimit
         ]
       );
 

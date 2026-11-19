@@ -15,7 +15,6 @@ concurrency:
 jobs:
   snapshot:
     runs-on: ubuntu-latest
-    timeout-minutes: 250       # kills a hung run instead of burning 6 hours
     steps:
       - uses: actions/checkout@v4
 
