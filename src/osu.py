@@ -32,16 +32,20 @@ data = []
 
 @sleep_and_retry
 @limits(calls=1, period=1)
-def callapi(user_id):
-    user = api.user(int(user_id))
-    stats = user.statistics
-    userstats = to_dict(stats)
-    userstats["user_id"] = int(user_id)
-    data.append(userstats)
+def sleepone():
+    pass
 
 
 for user_id in tqdm(users["user_id"], desc="Snapshot"):
-    callapi(user_id)
+    user = api.user(int(user_id))
+    stats = user.statistics
+    if stats is None:
+        tqdm.write(f"no statistics for {user_id}")
+        continue
+    userstats = to_dict(stats)
+    userstats["user_id"] = int(user_id)
+    data.append(userstats)
+    sleepone()
 json.dump(
     data, open(f"./data/snapshots/{date.today().isoformat()}.json", "w"), indent=2
 )
