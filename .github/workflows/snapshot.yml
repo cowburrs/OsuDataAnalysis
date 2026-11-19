@@ -15,11 +15,12 @@ concurrency:
 jobs:
   snapshot:
     runs-on: ubuntu-latest
-    timeout-minutes: 30       # kills a hung run instead of burning 6 hours
+    timeout-minutes: 250       # kills a hung run instead of burning 6 hours
     steps:
       - uses: actions/checkout@v4
 
       - uses: DeterminateSystems/nix-installer-action@main   # pin a release tag
+      - uses: DeterminateSystems/magic-nix-cache-action@main
 
       - name: Take snapshot
         run: nix run
