@@ -1,0 +1,37 @@
+name: daily-snapshot
+
+on:
+  schedule:
+    - cron: "5 0 * * *"      # 00:05 UTC daily (may start late)
+  workflow_dispatch:          # manual "Run workflow" button for testing
+
+permissions:
+  contents: write             # lets the job push the snapshot file
+
+concurrency:
+  group: osu-snapshot         # never run two snapshots at once (rate limit)
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30       # kills a hung run instead of burning 6 hours
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: DeterminateSystems/nix-installer-action@main   # pin a release tag
+
+      - name: Take snapshot
+        run: nix run
+        env:
+          OSU_CLIENT_ID: ${{ secrets.OSU_CLIENT_ID }}
+          OSU_CLIENT_SECRET: ${{ secrets.OSU_CLIENT_SECRET }}
+
+      - name: Commit snapshot
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/snapshots/
+          git commit -m "snapshot $(date -u +%F)" || exit 0
+          git pull --rebase
+          git push
